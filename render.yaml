@@ -1,0 +1,46 @@
+# Render blueprint. In the Render dashboard: New → Blueprint → point at this repo.
+# It creates the database and the API together; the secrets are filled in by hand
+# afterwards, because they should not live in a repository.
+services:
+  - type: web
+    name: civicfix-api
+    runtime: node
+    plan: free
+    rootDir: civicpulse-app/server
+    buildCommand: npm install
+    startCommand: npm run start
+    healthCheckPath: /api/health
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: civicfix-db
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true          # Render invents a strong one
+      - key: CLIENT_ORIGIN
+        sync: false                  # your Vercel URL, set by hand
+      - key: CLOUDINARY_URL
+        sync: false
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: ADMIN_EMAIL
+        value: admin@city.gov
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: ADMIN_NAME
+        value: Ward Office
+      - key: REQUIRE_GEOTAG
+        value: "false"
+      - key: REQUIRE_VIDEO
+        value: "false"
+      - key: REQUIRE_PUBLIC_LAND
+        value: "true"
+      - key: MAX_PHOTO_AGE_HOURS
+        value: "24"
+      - key: MAX_EXIF_DRIFT_M
+        value: "2000"
+
+databases:
+  - name: civicfix-db
+    plan: free
+    databaseName: civicfix
